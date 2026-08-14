@@ -497,9 +497,35 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const db  = firebase.database();
 
+// ─── SECURITY HELPERS ───────────────────────────────────────────
+// تحويل نص لـ HTML آمن للعرض (منع XSS) — يُستخدم مع أي بيانات جاية من
+// المستخدمين أو من Firebase قبل حقنها في innerHTML
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+// هاش SHA-256 لكلمات المرور — عشان متتخزنش plain text في Firebase
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+// أي قيمة hash بتبقى 64 حرف hex — بنفرقها عن plain text القديم عشان الترقية التلقائية
+function looksHashed(v) {
+  return typeof v === 'string' && /^[a-f0-9]{64}$/.test(v);
+}
+async function verifyPassword(inputPlain, stored) {
+  if (looksHashed(stored)) return (await sha256Hex(inputPlain)) === stored;
+  // توافق قديم: باسورد متخزن plain — قارن مباشرة (هيترقّى لـ hash بعد أول دخول ناجح)
+  return inputPlain === stored;
+}
+
 // ─── AUTH SYSTEM ──────────────────────────────────────────────
 // المستخدم الافتراضي (أدمن رئيسي — لا يُحذف)
-const ROOT_ADMIN = { username: 'admin', password: 'lsb2024', name: 'المدير', role: 'admin' };
+// كلمة مرور الأدمن متخزنة كـ hash مش plain text
+const ROOT_ADMIN = { username: 'admin', passwordHash: '59d769b5428972d95226efb5a6312a242738bba78f340a5b18d53b723fb4c03e', name: 'المدير', role: 'admin' };
 
 let currentUser = null;
 let USERS = {};
@@ -510,11 +536,11 @@ async function loadUsers() {
     if (snap.exists()) {
       USERS = snap.val();
     } else {
-      USERS = { admin: { name: ROOT_ADMIN.name, password: ROOT_ADMIN.password, role: 'admin', isRoot: true } };
+      USERS = { admin: { name: ROOT_ADMIN.name, password: ROOT_ADMIN.passwordHash, role: 'admin', isRoot: true } };
       await db.ref('lsb_users').set(USERS).catch(() => {});
     }
   } catch(e) {
-    USERS = { admin: { name: ROOT_ADMIN.name, password: ROOT_ADMIN.password, role: 'admin', isRoot: true } };
+    USERS = { admin: { name: ROOT_ADMIN.name, password: ROOT_ADMIN.passwordHash, role: 'admin', isRoot: true } };
   }
 }
 
@@ -526,25 +552,15 @@ async function doLogin() {
   err.style.display = 'none';
   if (!u || !p) { err.style.display = 'block'; err.textContent = 'أدخل اسم المستخدم وكلمة المرور!'; return; }
 
-  // تحقق مباشر من الأدمن الأصلي بدون Firebase
-  if (u === ROOT_ADMIN.username && p === ROOT_ADMIN.password) {
+  // تحقق مباشر من الأدمن الأصلي بدون Firebase (بالـ hash)
+  if (u === ROOT_ADMIN.username && (await sha256Hex(p)) === ROOT_ADMIN.passwordHash) {
     currentUser = { username: ROOT_ADMIN.username, name: ROOT_ADMIN.name, role: 'admin', isRoot: true };
     sessionStorage.setItem('lsb_user', JSON.stringify(currentUser));
-    // حدّث Firebase بـ plain password عشان يتوافق مع النظام الجديد
+    // تأكد إن admin موجود في Firebase بالـ hash بس، مش plain text
     db.ref('lsb_users').once('value').then(snap => {
-      if (snap.exists()) {
-        const users = snap.val();
-        let needsUpdate = false;
-        Object.keys(users).forEach(k => {
-          // لو الباسورد يبدو إنه hash قديم (btoa) حدّثه
-          if (users[k].password && users[k].password !== users[k].plainRef) {
-            // مش هنغير باسورد المستخدمين — بس نضيف علامة إن النظام اتحدث
-          }
-        });
-        // تأكد إن admin موجود بـ plain password
-        users['admin'] = { name: ROOT_ADMIN.name, password: ROOT_ADMIN.password, role: 'admin', isRoot: true };
-        db.ref('lsb_users').set(users).catch(() => {});
-      }
+      const users = snap.exists() ? snap.val() : {};
+      users['admin'] = { name: ROOT_ADMIN.name, password: ROOT_ADMIN.passwordHash, role: 'admin', isRoot: true };
+      db.ref('lsb_users').set(users).catch(() => {});
     }).catch(() => {});
     showApp();
     return;
@@ -565,10 +581,16 @@ async function doLogin() {
     err.textContent = 'اسم المستخدم غلط!';
     return;
   }
-  if (found.password !== p) {
+  const ok = await verifyPassword(p, found.password);
+  if (!ok) {
     err.style.display = 'block';
     err.textContent = 'كلمة المرور غلط!';
     return;
+  }
+  // ترقية تلقائية: لو الباسورد كان لسه plain text، حوّله لـ hash وخزّنه
+  if (!looksHashed(found.password)) {
+    found.password = await sha256Hex(p);
+    db.ref(`lsb_users/${u}`).set(found).catch(() => {});
   }
   currentUser = { username: u, name: found.name, role: found.role, isRoot: !!found.isRoot };
   sessionStorage.setItem('lsb_user', JSON.stringify(currentUser));
@@ -629,16 +651,26 @@ function renderUsers() {
       : 'background:rgba(245,166,35,0.15);color:var(--pro);border:1px solid var(--pro)';
     const card = document.createElement('div');
     card.className = 'user-card';
+    const safeName = escapeHtml(u.name);
+    const safeUname = escapeHtml(uname);
+    // ملحوظة أمان: مفيش onclick بقيمة مضمّنة من بيانات المستخدم — بنستخدم
+    // addEventListener بعد الإنشاء عشان نمنع أي احتمال حقن كود (XSS)
     card.innerHTML = `
-      <div class="user-avatar" style="background:${color};color:#0d0f18;width:38px;height:38px;min-width:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem">${u.name.charAt(0)}</div>
+      <div class="user-avatar" style="background:${color};color:#0d0f18;width:38px;height:38px;min-width:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem">${escapeHtml(u.name.charAt(0))}</div>
       <div class="uc-info">
-        <div class="uc-name">${u.name}</div>
-        <div class="uc-user">@${uname} · <span style="color:${color}">${roleLabel}</span></div>
+        <div class="uc-name">${safeName}</div>
+        <div class="uc-user">@${safeUname} · <span style="color:${color}">${roleLabel}</span></div>
       </div>
       <div class="uc-actions">
-        ${!isRoot ? `<button class="role-toggle-btn" style="${toggleStyle}" onclick="window._toggleRole('${uname}')">${toggleLabel}</button>` : ''}
-        ${!isRoot ? `<button class="del-user-btn" onclick="window._delUser('${uname}')">✕</button>` : '<span style="font-size:0.7rem;color:var(--muted);padding:0 4px">محمي</span>'}
+        ${!isRoot ? `<button class="role-toggle-btn" style="${toggleStyle}">${toggleLabel}</button>` : ''}
+        ${!isRoot ? `<button class="del-user-btn">✕</button>` : '<span style="font-size:0.7rem;color:var(--muted);padding:0 4px">محمي</span>'}
       </div>`;
+    if (!isRoot) {
+      const toggleBtn = card.querySelector('.role-toggle-btn');
+      const delBtn = card.querySelector('.del-user-btn');
+      if (toggleBtn) toggleBtn.addEventListener('click', () => toggleRole(uname));
+      if (delBtn) delBtn.addEventListener('click', () => delUser(uname));
+    }
     list.appendChild(card);
   });
 }
@@ -671,7 +703,8 @@ async function addUser() {
   if (!name || !username || !pass) { err.textContent = 'تأكد من ملء جميع الحقول'; err.style.display = 'block'; return; }
   if (USERS[username]) { err.textContent = 'اسم المستخدم ده موجود بالفعل!'; err.style.display = 'block'; return; }
   if (username.length < 3) { err.textContent = 'اسم المستخدم لازم 3 أحرف على الأقل'; err.style.display = 'block'; return; }
-  const newUser = { name, password: pass, role };
+  if (!/^[a-z0-9_.]+$/.test(username)) { err.textContent = 'اسم المستخدم لازم يكون حروف إنجليزية وأرقام بس'; err.style.display = 'block'; return; }
+  const newUser = { name, password: await sha256Hex(pass), role };
   try {
     await db.ref(`lsb_users/${username}`).set(newUser);
     USERS[username] = newUser;
@@ -912,7 +945,7 @@ function render() {
     tr.id = `row-${key()}-${item.amp}`;
     let cells = '';
     if (isGroup()) {
-      cells = `<td class="dims" style="color:var(--group);font-size:1rem;letter-spacing:1px">${item.code}</td>`;
+      cells = `<td class="dims" style="color:var(--group);font-size:1rem;letter-spacing:1px">${escapeHtml(item.code)}</td>`;
     } else if (isBodyW()) {
       cells = `<td class="dims" style="color:var(--body-w)">${fmtDim(item.bw)} cm</td>`;
     } else if (isHayt()) {
@@ -1070,7 +1103,7 @@ function doSearch() {
     card.classList.add('found');
     label.textContent = '✔ تم العثور على البيانات';
     if (isGroup()) {
-      cont.innerHTML = `<div class="result-dims" style="color:var(--group)">${found.code}</div><div class="result-sub">كود المجموعة — ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
+      cont.innerHTML = `<div class="result-dims" style="color:var(--group)">${escapeHtml(found.code)}</div><div class="result-sub">كود المجموعة — ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
     } else if (isBodyW()) {
       cont.innerHTML = `<div class="result-dims" style="color:var(--body-w)">${fmtDim(found.bw)} cm</div><div class="result-sub">عرض الجسم — ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
     } else if (isHayt()) {
