@@ -555,7 +555,7 @@ async function doLogin() {
   // تحقق مباشر من الأدمن الأصلي بدون Firebase (بالـ hash)
   if (u === ROOT_ADMIN.username && (await sha256Hex(p)) === ROOT_ADMIN.passwordHash) {
     currentUser = { username: ROOT_ADMIN.username, name: ROOT_ADMIN.name, role: 'admin', isRoot: true };
-    sessionStorage.setItem('lsb_user', JSON.stringify(currentUser));
+    localStorage.setItem('lsb_user', JSON.stringify(currentUser));
     // تأكد إن admin موجود في Firebase بالـ hash بس، مش plain text
     db.ref('lsb_users').once('value').then(snap => {
       const users = snap.exists() ? snap.val() : {};
@@ -593,13 +593,13 @@ async function doLogin() {
     db.ref(`lsb_users/${u}`).set(found).catch(() => {});
   }
   currentUser = { username: u, name: found.name, role: found.role, isRoot: !!found.isRoot };
-  sessionStorage.setItem('lsb_user', JSON.stringify(currentUser));
+  localStorage.setItem('lsb_user', JSON.stringify(currentUser));
   showApp();
 }
 
 function doLogout() {
   currentUser = null;
-  sessionStorage.removeItem('lsb_user');
+  localStorage.removeItem('lsb_user');
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('loginErr').style.display = 'none';
@@ -733,7 +733,7 @@ window.closeUsersPanel = closeUsersPanel;
 window.addUser = addUser;
 
 // ─── CHECK SESSION ────────────────────────────────────────────
-const savedUser = sessionStorage.getItem('lsb_user');
+const savedUser = localStorage.getItem('lsb_user');
 if (savedUser) {
   try {
     currentUser = JSON.parse(savedUser);
