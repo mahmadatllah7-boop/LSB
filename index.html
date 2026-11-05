@@ -25,7 +25,7 @@ applyView();document.addEventListener('DOMContentLoaded',applyView);})();
 --font:'IBM Plex Sans Arabic','Cairo',system-ui,sans-serif;
 --bg:#0b0e17;--surface:#11162a;--card:#171d33;--card2:#1e2542;--border:#252d4a;--border2:#34406a;--text:#eaedf7;--muted:#8d97b8;
 --pro:#f5a623;--pro2:#e8891a;--lsb2:#4aa3ff;--lsba:#b98aff;
---shajr:#f5a623;--hayt:#00d4aa;--kost:#ff6b6b;--group:#f0c040;--body-w:#a78bfa;--ajsam:#ff6bcb;--nahas:#d98a54;--tamdid:#8be04a;--mokhna:#22d3ee;
+--shajr:#f5a623;--hayt:#00d4aa;--kost:#ff6b6b;--group:#f0c040;--body-w:#a78bfa;--ajsam:#ff6bcb;--nahas:#d98a54;--tamdid:#8be04a;--mokhna:#22d3ee;--idc:#38bdf8;--sizelim:#fbbf24;--busbarc:#f472b6;
 --success:#2ecc71;--danger:#ef5b4c;--t:var(--pro);--radius:14px;--ease:cubic-bezier(.22,.9,.3,1)}
 html{scroll-behavior:smooth;color-scheme:dark}
 body{font-family:var(--font);background:var(--bg) radial-gradient(1000px 420px at 90% -140px,rgba(245,166,35,.07),transparent 70%) no-repeat;color:var(--text);min-height:100vh;overflow-x:hidden;font-variant-numeric:tabular-nums;line-height:1.5}
@@ -65,11 +65,16 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .main-tab:hover{background:var(--card);color:var(--text)}
 .main-tab[class*="act-"]{color:var(--c);font-weight:700;background:color-mix(in srgb,var(--c) 11%,transparent);border-color:color-mix(in srgb,var(--c) 30%,transparent)}
 .main-tab[class*="act-"]::before{transform:scaleY(1)}
-.act-shajr{--c:var(--shajr)}.act-hayt{--c:var(--hayt)}.act-sheala{--c:var(--lsb2)}.act-kost{--c:var(--kost)}.act-group{--c:var(--group)}.act-bodyw{--c:var(--body-w)}.act-ajsam{--c:var(--ajsam)}.act-nahas{--c:var(--nahas)}.act-tamdid{--c:var(--tamdid)}.act-mokhna{--c:var(--mokhna)}
+.act-shajr{--c:var(--shajr)}.act-hayt{--c:var(--hayt)}.act-sheala{--c:var(--lsb2)}.act-kost{--c:var(--kost)}.act-group{--c:var(--group)}.act-bodyw{--c:var(--body-w)}.act-ajsam{--c:var(--ajsam)}.act-nahas{--c:var(--nahas)}.act-tamdid{--c:var(--tamdid)}.act-mokhna{--c:var(--mokhna)}.act-id{--c:var(--idc)}.act-sizelimits{--c:var(--sizelim)}.act-busbar{--c:var(--busbarc)}
 .type-btn.act-pro{--c:var(--pro)}.type-btn.act-lsb2{--c:var(--lsb2)}.type-btn.act-lsba{--c:var(--lsba)}
 
-.content{display:grid;grid-template-columns:390px minmax(0,1fr);gap:20px;align-items:start;min-width:0}
-.finder{position:sticky;top:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.content{display:flex;flex-direction:column;align-items:center;gap:20px;min-width:0}
+.main-area{min-width:0}
+.extra-panel{display:flex;flex-direction:column;gap:20px;min-width:0}
+.two-row-head th{white-space:nowrap}
+.two-row-head thead tr:last-child th{top:39px}
+.finder{position:static;display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px;min-width:0}
+.content>.table-section{width:100%}
 .type-selector{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
 .type-btn{--c:var(--muted);flex:1;padding:10px 6px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:.88rem;font-weight:700;text-align:center;transition:background .2s,color .2s}
 .type-btn:hover{color:var(--text);background:var(--card)}
@@ -367,6 +372,7 @@ body.viewer-mode table th:last-child,body.viewer-mode table td:last-child:not([c
 .is-mobile .main-tab{flex-shrink:0;padding:9px 13px;white-space:nowrap;font-size:.84rem;border-radius:999px;gap:7px;border-color:var(--border)}
 .is-mobile .main-tab .ti{width:16px;height:16px}.is-mobile .main-tab::before{display:none}
 .is-mobile .content{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:14px}
+.is-mobile .extra-panel{padding:14px;gap:14px}
 .is-mobile .finder,.is-mobile .table-section{width:100%}
 .is-mobile .finder{position:static}
 .is-mobile .search-box input{font-size:1.25rem}.is-mobile .btn{padding:0 20px}
@@ -541,9 +547,13 @@ html.framed .view-toggle{bottom:20px;left:20px}
         <button class="main-tab" id="mtab-nahas"  onclick="switchMain('nahas')"><svg class="ti" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="4.5" rx="1"/><rect x="3" y="13.5" width="18" height="4.5" rx="1"/></svg><span>نحاس التجميع</span></button>
         <button class="main-tab" id="mtab-tamdid" onclick="switchMain('tamdid')"><svg class="ti" viewBox="0 0 24 24"><path d="M4 8h16v11H4zM4 8l3-4h10l3 4M10 13h4"/></svg><span>علبة تمدد</span></button>
         <button class="main-tab" id="mtab-mokhna" onclick="switchMain('mokhna')"><svg class="ti" viewBox="0 0 24 24"><path d="M3 21V10l6 3V10l6 3V5h4v16zM7 17h2M13 17h2"/></svg><span>مدخنة محول جاف</span></button>
+        <button class="main-tab" id="mtab-id" onclick="switchExtra('id')"><svg class="ti" viewBox="0 0 24 24"><path d="M3 11.5V6a2 2 0 0 1 2-2h5.5L21 14.5l-7 7L3 11.5z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg><span>ID</span></button>
+        <button class="main-tab" id="mtab-sizelimits" onclick="switchMain('sizelimits')"><svg class="ti" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg><span>Size Limits</span></button>
+        <button class="main-tab" id="mtab-busbar" onclick="switchMain('busbar')"><svg class="ti" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="6" rx="1"/><path d="M4 6.5v2M20 6.5v2"/></svg><span>Busbar</span></button>
       </nav>
     </aside>
 
+    <div class="main-area">
     <main class="content">
       <section class="finder">
         <div class="type-selector" id="typeSelector" role="group" aria-label="النوع">
@@ -587,6 +597,41 @@ html.framed .view-toggle{bottom:20px;left:20px}
         </div>
       </section>
     </main>
+
+    <!-- ===== ID ===== -->
+    <section class="extra-panel hidden" id="panel-id">
+      <div class="search-box" id="idSearchBox" style="border-top-color:var(--idc)">
+        <label for="idSearchInput">بحث سريع (بالاسم أو الـ ID)</label>
+        <div class="input-row">
+          <input type="text" id="idSearchInput" placeholder="اكتب اسم القطعة أو الـ ID…" autocomplete="off" oninput="window._renderIdTable()" />
+        </div>
+      </div>
+      <section class="table-section" id="idTableSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">ID</h2>
+            <div class="meta"><span>عدد السجلات <b id="idStatCount">0</b></span></div>
+          </div>
+          <button class="add-btn" id="idAddBtnEl" onclick="window._toggleIdAddForm()" style="border-color:var(--idc);color:var(--idc)">+ إضافة</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead id="idTableHead"><tr><th>اسم القطعة</th><th>ID</th><th></th></tr></thead>
+            <tbody id="idTableBody"></tbody>
+          </table>
+        </div>
+        <div class="add-form" id="idAddForm" style="border-color:var(--idc)">
+          <div class="row">
+            <input type="text" id="id-na-name" placeholder="اسم القطعة" style="flex:2" />
+            <input type="number" id="id-na-id" placeholder="ID" />
+            <button class="save-btn" style="background:var(--idc)" onclick="window._addIdEntry()">حفظ</button>
+          </div>
+          <div class="err-msg" id="idErrMsg">تأكد من إدخال جميع الحقول</div>
+        </div>
+      </section>
+    </section>
+
+    </div>
   </div>
 
   <footer class="app-footer">
@@ -908,6 +953,13 @@ const DB_DEFAULT = {
   tamdid_pro:  [ {amp:1250,l:27,w:20,d:15}, {amp:2000,l:27,w:23,d:15}, {amp:2500,l:27,w:25,d:15}, {amp:4000,l:27,w:32,d:15} ],
   tamdid_lsb2: [ {amp:1250,l:27,w:19,d:15}, {amp:2000,l:27,w:22,d:15}, {amp:3200,l:27,w:28,d:15} ],
   tamdid_lsba: [ {amp:1000,l:27,w:18,d:15}, {amp:2000,l:27,w:21,d:15} ],
+
+  // ID: اسم القطعة + ID — قائمة واحدة (مش مقسّمة حسب النوع)
+  id_list: [],
+  // Size Limits (أكتر من قطعة لكل أمبير): {amp, name, dims: 1|2|3, min:{l1,l2,l3}, max:{...}, def:{...}}
+  sizelimits_pro: [], sizelimits_lsb2: [], sizelimits_lsba: [],
+  // Busbar (مرتبط بالأمبير): S.C + فول {w, th} + هاف {w, th}
+  busbar_pro: [], busbar_lsb2: [], busbar_lsba: [],
 };
 
 let DB = JSON.parse(JSON.stringify(DB_DEFAULT));
@@ -974,6 +1026,7 @@ function loadDB() {
       firstLoad = false;
     }
     render();
+    refreshExtraIfActive();
   }, (error) => {
     console.error('Listener error:', error);
     showLoading(false);
@@ -986,8 +1039,8 @@ let ampType = 'pro';
 
 // ─── COLORS ───────────────────────────────────────────────────
 const TYPE_COLOR = { pro:'var(--pro)', lsb2:'var(--lsb2)', lsba:'var(--lsba)' };
-const TAB_ACT    = { shajr:'act-shajr', hayt:'act-hayt', sheala:'act-sheala', kost:'act-kost', group:'act-group', bodyw:'act-bodyw', ajsam:'act-ajsam', nahas:'act-nahas', tamdid:'act-tamdid', mokhna:'act-mokhna' };
-const TAB_ICON   = { shajr:'بالتة شجر', hayt:'بالتة حائط', sheala:'شيالات', kost:'كوستيلا', group:'كود المجموعة', bodyw:'عرض الجسم', ajsam:'الأجسام', nahas:'نحاس التجميع', tamdid:'علبة تمدد', mokhna:'مدخنة محول جاف' };
+const TAB_ACT    = { shajr:'act-shajr', hayt:'act-hayt', sheala:'act-sheala', kost:'act-kost', group:'act-group', bodyw:'act-bodyw', ajsam:'act-ajsam', nahas:'act-nahas', tamdid:'act-tamdid', mokhna:'act-mokhna', sizelimits:'act-sizelimits', busbar:'act-busbar' };
+const TAB_ICON   = { shajr:'بالتة شجر', hayt:'بالتة حائط', sheala:'شيالات', kost:'كوستيلا', group:'كود المجموعة', bodyw:'عرض الجسم', ajsam:'الأجسام', nahas:'نحاس التجميع', tamdid:'علبة تمدد', mokhna:'مدخنة محول جاف', sizelimits:'Size Limits', busbar:'Busbar' };
 const TYPE_ACT   = { pro:'act-pro', lsb2:'act-lsb2', lsba:'act-lsba' };
 const TYPE_LABEL = { pro:'LSB PRO', lsb2:'LSB 2', lsba:'LSB A' };
 const READONLY_TABS = [];
@@ -997,8 +1050,9 @@ function fmtDim(n) { if (n === undefined || n === null || isNaN(n)) return '—'
 
 // ─── SWITCH MAIN TAB ──────────────────────────────────────────
 function switchMain(tab) {
+  hideExtraPanels();
   mainTab = tab;
-  ['shajr','hayt','sheala','kost','group','bodyw','ajsam','nahas','tamdid','mokhna'].forEach(t => {
+  ['shajr','hayt','sheala','kost','group','bodyw','ajsam','nahas','tamdid','mokhna','sizelimits','busbar'].forEach(t => {
     const el = document.getElementById(`mtab-${t}`);
     el.className = 'main-tab' + (t === tab ? ` ${TAB_ACT[t]}` : '');
   });
@@ -1042,6 +1096,30 @@ function isNahas()     { return mainTab === 'nahas'; }
 function isTamdid()    { return mainTab === 'tamdid'; }
 function isShajr()     { return mainTab === 'shajr'; }
 function isMokhna()    { return mainTab === 'mokhna'; }
+function isBusbar()    { return mainTab === 'busbar'; }
+function isSizeLim()   { return mainTab === 'sizelimits'; }
+
+// ─── SIZE LIMITS / BUSBAR HELPERS ─────────────────────────────
+const SL_DIM_LABEL = ['', 'بعد واحد', 'بعد اتنين', 'تلات أبعاد'];
+const SL_LEGACY = { min:['minL','minW','minH'], max:['maxL','maxW','maxH'], def:['defL','defW','defH'] };
+let slDims = 3; // عدد الأبعاد المختار في فورم Size Limits
+function slDimCount(item) { return item.dims || 3; } // السجلات القديمة (L/W/H) بتتعامل كتلات أبعاد
+function slVal(item, set, n) { return item.dims === undefined ? item[SL_LEGACY[set][n-1]] : item[set]?.[`l${n}`]; }
+function slNums(item, set) { return [...Array(slDimCount(item))].map((_, i) => fmtDim(slVal(item, set, i+1))).join(' × '); }
+function slText(item, set) { return [...Array(slDimCount(item))].map((_, i) => `ط${i+1}: ${fmtDim(slVal(item, set, i+1))}`).join(' · '); }
+function slApplyDims() {
+  const color = TYPE_COLOR[ampType];
+  [1,2,3].forEach(n => {
+    const b = document.getElementById(`sl-dim-${n}`);
+    if (!b) return;
+    b.classList.toggle('act-sl', n === slDims);
+    b.style.setProperty('--c', color);
+  });
+  document.querySelectorAll('#addFormRow [data-dim]').forEach(el => { el.style.display = Number(el.dataset.dim) <= slDims ? '' : 'none'; });
+}
+window._slSetDims = n => { slDims = n; slApplyDims(); };
+function bbFull(item) { return item.full || { w: item.w, th: item.th }; } // السجلات القديمة (W/TH) بتتحسب فول
+function bbHalf(item) { return item.half || {}; }
 
 // ─── PALETTE NOTE (بالتة شجر) ─────────────────────────────────
 // الملحوظة بتكتب نفس الأرقام الموجودة في البالتة بدون أي تحويل (مثال: 47 × 47 ← بالبالته 47*47 على بعد 17سم)
@@ -1079,6 +1157,8 @@ function render() {
   else if (isAjsam())  colHeaders = '<th>Casing A</th><th>Casing B</th><th>الأشكال الخاصة</th>';
   else if (isNahas())  colHeaders = '<th>الطول (mm)</th><th>العرض (mm)</th><th>السمك (mm)</th><th>العدد لكل باره</th>';
   else if (isShajr())  colHeaders = '<th>المقاس (cm)</th><th>الملحوظة</th>';
+  else if (isBusbar())  colHeaders = '<th>S.C</th><th style="color:var(--busbarc)">Full</th><th style="color:var(--hayt)">Half</th>';
+  else if (isSizeLim()) colHeaders = '<th>اسم القطعة</th><th>النوع</th><th>Min</th><th>Max</th><th>Default</th>';
   else if (mainTab === 'sheala') colHeaders = '<th>الطول (cm)</th>';
   else                 colHeaders = '<th>المقاس (cm)</th>';
 
@@ -1113,6 +1193,11 @@ function render() {
       cells = `<td class="dims">${fmtDim(item.casingA)}</td><td class="dims">${fmtDim(item.casingB)}</td><td class="dims">${fmtDim(item.shapes)}</td>`;
     } else if (isNahas()) {
       cells = `<td class="dims">${fmtDim(item.len)}</td><td class="dims">${fmtDim(item.w)}</td><td class="dims">${fmtDim(item.thick)}</td><td class="dims">${fmtDim(item.count)}</td>`;
+    } else if (isBusbar()) {
+      const f = bbFull(item), h = bbHalf(item);
+      cells = `<td class="dims">${fmtDim(item.sc)}</td><td class="dims" style="color:var(--busbarc)">${fmtDim(f.w)} × ${fmtDim(f.th)}</td><td class="dims" style="color:var(--hayt)">${fmtDim(h.w)} × ${fmtDim(h.th)}</td>`;
+    } else if (isSizeLim()) {
+      cells = `<td>${escapeHtml(item.name || '—')}</td><td>${SL_DIM_LABEL[slDimCount(item)]}</td><td class="dims">${slText(item, 'min')}</td><td class="dims">${slText(item, 'max')}</td><td class="dims" style="color:var(--sizelim)">${slText(item, 'def')}</td>`;
     } else if (isSingleDim()) {
       cells = `<td class="dims">${fmtDim(item.len)} cm</td>`;
     } else {
@@ -1150,6 +1235,15 @@ function buildAddForm() {
     row.innerHTML = `<input type="number" id="na-amp" placeholder="الأمبير" /><input type="number" id="na-casinga" placeholder="Casing A" step="0.01" /><input type="number" id="na-casingb" placeholder="Casing B" step="0.01" /><input type="number" id="na-shapes" placeholder="الأشكال الخاصة" step="0.01" /><button class="save-btn" style="background:${color}" onclick="window._addEntry()">حفظ</button>`;
   } else if (isNahas()) {
     row.innerHTML = `<input type="number" id="na-len" placeholder="الطول (mm)" step="0.01" /><input type="number" id="na-w" placeholder="العرض (mm)" step="0.01" /><input type="number" id="na-thick" placeholder="السمك (mm)" step="0.01" /><input type="number" id="na-count" placeholder="العدد لكل باره" step="0.01" /><input type="number" id="na-amp" placeholder="الأمبير" /><button class="save-btn" style="background:${color}" onclick="window._addEntry()">حفظ</button>`;
+  } else if (isBusbar()) {
+    const pair = (label, p) => `<div class="row" style="width:100%"><span class="sep" style="min-width:58px">${label}</span><input type="number" id="na-${p}w" placeholder="W" step="0.01" /><input type="number" id="na-${p}th" placeholder="TH" step="0.01" /></div>`;
+    row.innerHTML = `<div class="row" style="width:100%"><input type="number" id="na-amp" placeholder="الأمبير" style="flex:1" /><input type="number" id="na-sc" placeholder="S.C" step="any" style="flex:1" /></div>` + pair('Full','f') + pair('Half','h') + `<div class="row" style="width:100%;justify-content:flex-end"><button class="save-btn" style="background:${color}" onclick="window._addEntry()">حفظ</button></div>`;
+  } else if (isSizeLim()) {
+    const dimBtns = [1,2,3].map(n => `<button type="button" class="type-btn" id="sl-dim-${n}" onclick="window._slSetDims(${n})">${SL_DIM_LABEL[n]}</button>`).join('');
+    const dimRow = (label, p) => `<div class="row" style="width:100%"><span class="sep" style="min-width:58px">${label}</span>${[1,2,3].map(n => `<input type="number" id="na-${p}${n}" data-dim="${n}" placeholder="ط${n}" step="0.01" />`).join('')}</div>`;
+    slDims = 3;
+    row.innerHTML = `<input type="number" id="na-amp" placeholder="الأمبير" style="flex:1 1 100%" /><input type="text" id="na-name" placeholder="اسم القطعة" style="flex:1 1 100%" /><div class="row" style="width:100%"><span class="sep" style="min-width:58px">النوع</span>${dimBtns}</div>` + dimRow('Min','min') + dimRow('Max','max') + dimRow('Default','def') + `<div class="row" style="width:100%;justify-content:flex-end"><button class="save-btn" style="background:${color}" onclick="window._addEntry()">حفظ</button></div>`;
+    slApplyDims();
   } else if (isSingleDim()) {
     const ph = mainTab === 'kost' ? 'المقاس (cm)' : 'الطول (cm)';
     row.innerHTML = `<input type="number" id="na-amp" placeholder="الأمبير" /><input type="number" id="na-len" placeholder="${ph}" step="0.01" /><button class="save-btn" style="background:${color}" onclick="window._addEntry()">حفظ</button>`;
@@ -1204,7 +1298,7 @@ async function addEntry() {
   err.textContent = 'تأكد من إدخال جميع الحقول';
   const amp = parseInt(document.getElementById('na-amp')?.value);
   if (!amp) { err.style.display = 'block'; return; }
-  if (data().find(d => d.amp === amp)) { err.textContent = 'الأمبير ده موجود بالفعل!'; err.style.display = 'block'; return; }
+  if (!isSizeLim() && data().find(d => d.amp === amp)) { err.textContent = 'الأمبير ده موجود بالفعل!'; err.style.display = 'block'; return; }
 
   if (isGroup()) {
     const code = document.getElementById('na-code')?.value?.trim();
@@ -1233,6 +1327,21 @@ async function addEntry() {
     const count = parseFloat(document.getElementById('na-count')?.value);
     if (!len || !w || !thick || !count) { err.style.display = 'block'; return; }
     data().push({amp, len, w, thick, count});
+  } else if (isBusbar()) {
+    const [fw, fth] = ['na-fw','na-fth'].map(id => parseFloat(document.getElementById(id)?.value));
+    const [hw, hth] = ['na-hw','na-hth'].map(id => parseFloat(document.getElementById(id)?.value));
+    const sc = parseFloat(document.getElementById('na-sc')?.value);
+    if ([sc, fw, fth, hw, hth].some(isNaN)) { err.style.display = 'block'; return; }
+    data().push({amp, sc, full:{w:fw, th:fth}, half:{w:hw, th:hth}});
+  } else if (isSizeLim()) {
+    const name = document.getElementById('na-name')?.value?.trim();
+    if (!name) { err.style.display = 'block'; return; }
+    if (data().find(d => d.amp === amp && d.name === name)) { err.textContent = 'القطعة دي موجودة بالفعل في الأمبير ده!'; err.style.display = 'block'; return; }
+    const read = p => [1,2,3].slice(0, slDims).map(n => parseFloat(document.getElementById(`na-${p}${n}`)?.value));
+    const mins = read('min'), maxs = read('max'), defs = read('def');
+    if ([...mins, ...maxs, ...defs].some(isNaN)) { err.style.display = 'block'; return; }
+    const toObj = arr => Object.fromEntries(arr.map((v, i) => [`l${i+1}`, v]));
+    data().push({amp, name, dims: slDims, min: toObj(mins), max: toObj(maxs), def: toObj(defs)});
   } else if (isSingleDim()) {
     const len = parseFloat(document.getElementById('na-len')?.value);
     if (!len) { err.style.display = 'block'; return; }
@@ -1330,6 +1439,12 @@ function doSearch() {
       cont.innerHTML = `<div class="result-dims" style="color:var(--ajsam);font-size:1.3rem">Casing A: ${fmtDim(found.casingA)} &nbsp;|&nbsp; Casing B: ${fmtDim(found.casingB)} &nbsp;|&nbsp; أشكال خاصة: ${fmtDim(found.shapes)}</div><div class="result-sub">الأجسام — ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
     } else if (isNahas()) {
       cont.innerHTML = `<div class="result-dims" style="color:var(--nahas);font-size:1.3rem">${fmtDim(found.len)} × ${fmtDim(found.w)} × ${fmtDim(found.thick)} mm</div><div class="result-sub">العدد لكل باره: <span style="font-weight:700">${fmtDim(found.count)}</span></div><div class="result-sub">نحاس التجميع — ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
+    } else if (isBusbar()) {
+      const f = bbFull(found), h = bbHalf(found);
+      cont.innerHTML = `<div class="result-dims" style="display:block;color:var(--busbarc)">Full: ${fmtDim(f.w)} × ${fmtDim(f.th)}</div><div class="result-dims" style="display:block;color:var(--hayt)">Half: ${fmtDim(h.w)} × ${fmtDim(h.th)}</div><div class="result-sub">${TAB_ICON[mainTab]} ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div><div class="result-sub">S.C: <span style="font-weight:700">${fmtDim(found.sc)}</span></div>`;
+    } else if (isSizeLim()) {
+      const list = data().filter(d => d.amp === found.amp);
+      cont.innerHTML = list.map(it => `<div class="result-dims" style="color:var(--sizelim);font-size:1.3rem">${escapeHtml(it.name || '—')} <span style="font-size:.8rem;color:var(--muted)">${SL_DIM_LABEL[slDimCount(it)]}</span></div><div class="result-sub">Min: <span style="font-weight:700">${slNums(it, 'min')}</span></div><div class="result-sub">Max: <span style="font-weight:700">${slNums(it, 'max')}</span></div><div class="result-sub" style="color:var(--sizelim)">Default: <span style="font-weight:700">${slNums(it, 'def')}</span></div>`).join('') + `<div class="result-sub">${TAB_ICON[mainTab]} ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
     } else if (isSingleDim()) {
       const label2 = mainTab === 'kost' ? 'كوستيلا' : 'شيالة';
       cont.innerHTML = `<div class="result-dims">${fmtDim(found.len)} cm</div><div class="result-sub">${label2} ${typeLabel} — أمبير <span style="color:${color}">${fmtAmp(found.amp)}</span></div>`;
@@ -1425,6 +1540,80 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 applyView();
 
+// ─── EXTRA TABS: ID / Size Limits / Busbar ─────────────────────
+const EXTRA_TABS = ['id'];
+const EXTRA_ACT  = { id: 'act-id' };
+const ORIG_TABS  = ['shajr','hayt','sheala','kost','group','bodyw','ajsam','nahas','tamdid','mokhna','sizelimits','busbar'];
+
+function hideExtraPanels() {
+  document.querySelector('main.content').style.display = '';
+  EXTRA_TABS.forEach(t => {
+    document.getElementById(`panel-${t}`).classList.add('hidden');
+    document.getElementById(`mtab-${t}`).className = 'main-tab';
+  });
+}
+
+function switchExtra(tab) {
+  document.querySelector('main.content').style.display = 'none';
+  ORIG_TABS.forEach(t => { document.getElementById(`mtab-${t}`).className = 'main-tab'; });
+  EXTRA_TABS.forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+    document.getElementById(`mtab-${t}`).className = 'main-tab' + (t === tab ? ` ${EXTRA_ACT[t]}` : '');
+  });
+  document.querySelectorAll('.main-tab').forEach(b => b.removeAttribute('aria-current'));
+  const act = document.getElementById(`mtab-${tab}`);
+  act.setAttribute('aria-current', 'page');
+  act.scrollIntoView({ inline: 'center', block: 'nearest' });
+  if (tab === 'id') renderIdTable();
+
+}
+
+function refreshExtraIfActive() {
+  if (!document.getElementById('panel-id').classList.contains('hidden')) renderIdTable();
+}
+
+function labelCells(tr, labels) {
+  [...tr.children].forEach((td, i) => { if (labels[i]) td.setAttribute('data-label', labels[i]); });
+}
+
+// ─── ID: اسم القطعة + ID ────────────────────────────────────────
+function renderIdTable() {
+  const list = DB.id_list || (DB.id_list = []);
+  const q = (document.getElementById('idSearchInput')?.value || '').trim().toLowerCase();
+  const filtered = q ? list.filter(it => String(it.name).toLowerCase().includes(q) || String(it.id).toLowerCase().includes(q)) : list;
+  document.getElementById('idStatCount').textContent = list.length;
+  const tbody = document.getElementById('idTableBody');
+  tbody.innerHTML = '';
+  filtered.forEach(item => {
+    const i = list.indexOf(item);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="dims" style="text-align:right;padding-right:14px">${escapeHtml(item.name)}</td><td class="dims" style="color:var(--idc)">${escapeHtml(String(item.id))}</td><td><button class="del-btn" onclick="window._deleteIdEntry(${i})">✕</button></td>`;
+    labelCells(tr, ['اسم القطعة', 'ID', '']);
+    tbody.appendChild(tr);
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="3">${list.length ? 'لا توجد نتائج مطابقة' : 'لا توجد سجلات بعد — اضغط «إضافة» لإدخال أول سجل.'}</td></tr>`;
+  }
+}
+function toggleIdAddForm() { document.getElementById('idAddForm').classList.toggle('open'); document.getElementById('idErrMsg').style.display = 'none'; }
+async function addIdEntry() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const err = document.getElementById('idErrMsg');
+  err.style.display = 'none';
+  const name = document.getElementById('id-na-name')?.value?.trim();
+  const idVal = parseFloat(document.getElementById('id-na-id')?.value);
+  if (!name || isNaN(idVal)) { err.textContent = 'تأكد من إدخال جميع الحقول'; err.style.display = 'block'; return; }
+  (DB.id_list || (DB.id_list = [])).push({ name, id: idVal });
+  await saveDB();
+  document.getElementById('idAddForm').classList.remove('open');
+  renderIdTable();
+}
+async function deleteIdEntry(idx) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const list = DB.id_list || [];
+  if (await uiConfirm('هتحذف هذا السجل؟')) { list.splice(idx, 1); await saveDB(); renderIdTable(); }
+}
+
 // ─── EXPOSE TO HTML (module scope fix) ────────────────────────
 window._addEntry         = addEntry;
 window._addEntryHayt     = addEntryHayt;
@@ -1438,6 +1627,11 @@ window.switchMain        = switchMain;
 window.switchType        = switchType;
 window.toggleAddForm     = toggleAddForm;
 window.doSearch          = doSearch;
+window.switchExtra          = switchExtra;
+window._renderIdTable       = renderIdTable;
+window._toggleIdAddForm     = toggleIdAddForm;
+window._addIdEntry          = addIdEntry;
+window._deleteIdEntry       = deleteIdEntry;
 
 // ─── KEYBOARD ─────────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
